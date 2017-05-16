@@ -33,7 +33,6 @@ def getDataPlayers():
         tipo_jugador[i] = tipo.string[0]
         i = i + 1
 
-
     ## Obtenemos todas las tablas como array
     jugadores_tables = soup.find_all("table")
 
@@ -46,14 +45,12 @@ def getDataPlayers():
         column_name[i] = name.string
         i = i + 1
 
-
     ## Añadimos posicion position
     column_name.append('Position')
 
-
     jugadores_dict = []
 
-    ptype = [u'G',u'D',u'M',u'F']
+    ptype = [u'POR',u'DEF',u'MED',u'DEL']
 
     j=0
     for t in jugadores_tables:
@@ -71,39 +68,23 @@ def getDataPlayers():
                           "posicion": ptype[tipo_num]
                           }
             jugadores_dict.append(dict_entry)
-
     return jugadores_dict
 
 
 def insertarData():
-
     data = getDataPlayers()
+    premierCollection.remove()
+    for d in data:
+        premierCollection.insert({
+            "extractdate": d['extractdate'],
+            "jugador": d['jugador'],
+            "equipo": d['equipo'],
+            "rawpoints": d['rawpoints'],
+            "coste": d['coste'],
+            "posicion": d['posicion']
+        })
+    print "Insertado correctamente: premier league"
 
-    bd = premierCollection.find()
-
-    if bd.count() == 0:
-        for d in data:
-            premierCollection.insert({
-                "extractdate": d['extractdate'],
-                "jugador": d['jugador'],
-                "equipo": d['equipo'],
-                "rawpoints": d['rawpoints'],
-                "coste": d['coste'],
-                "posicion": d['posicion']
-            })
-        print "Insertado correctamente "
-    else:
-        premierCollection.remove()
-        for d in data:
-            premierCollection.insert({
-                "extractdate": d['extractdate'],
-                "jugador": d['jugador'],
-                "equipo": d['equipo'],
-                "rawpoints": d['rawpoints'],
-                "coste": d['coste'],
-                "posicion": d['posicion']
-            })
-        print "Insertado correctamente "
 
 client.close()
 
