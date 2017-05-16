@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import json
+
 import requests
 import htmlmin
 from bs4 import BeautifulSoup
@@ -9,8 +11,9 @@ from pymongo import MongoClient
 client = MongoClient()
 db = client.liga
 premierCollection = db.premier
+santanderCollection = db.santander
 
-def getDataPlayers():
+def getDataPlayersPremier():
     url = "http://fantasy.premierleague.com/player-list/"
     r = requests.get(url)
 
@@ -59,7 +62,7 @@ def getDataPlayers():
         datos = t.find_all("td")
 
         for p in range (0,len(datos)/4):
-            datos[4*p].string = datos[4*p].string.encode('ascii', 'replace')
+            datos[4*p].string = datos[4*p].string.encode('utf-8')
             dict_entry = {"extractdate":str(datetime.today()),
                           "jugador": datos[4*p].string,
                           "equipo": datos[4*p+1].string,
@@ -71,8 +74,52 @@ def getDataPlayers():
     return jugadores_dict
 
 
+def getDataPlayersSantander():
+    ##peticion a la web
+    url = "http://www.resultados-futbol.com/primera/grupo1/jugadores"
+    r = requests.get(url)
+
+    ##Minify html - quitar espacios en blanco
+    rmin = htmlmin.minify(r.text, remove_empty_space=True)
+
+    ##Soup - scrapping
+    soup = BeautifulSoup(rmin, "html.parser")
+
+    ##Obtenemos la tabla de jugadores como array
+    jugadores_tables = soup.find_all('table', {'id': 'tabla1'})
+
+    jugadores_dict = []
+
+
+    for j in jugadores_tables:
+        datos = j.find_all("tr")
+        for d in datos:
+            jugador = d.td.strong.string
+
+            # posicion de jugador str(.encode('iso-8859-1'))
+            posicion = d.find('td',{'class':'pos1'}).string
+
+            # Equipo del jugador
+            equipo = jugador.parent.parent.parent.parent.parent.parent.parent.parent.find_next('span').find_next('span').img['alt']
+
+            # Diccionario de entrada
+            dic_in = {"jugador": jugador.replace(". ", "."),
+                      "posicion": posicion,
+                      "equipo": equipo,
+                      }
+
+            # array de jugadores
+            jugadores_dict.append(dic_in)
+
+
+    return jugadores_dict
+
+
+
+
 def insertarData():
-    data = getDataPlayers()
+    data = getDataPlayersPremier()
+    data1 = getDataPlayersSantander()
     premierCollection.remove()
     for d in data:
         premierCollection.insert({
@@ -84,10 +131,18 @@ def insertarData():
             "posicion": d['posicion']
         })
     print "Insertado correctamente: premier league"
+    santanderCollection.remove()
+    for d in data1:
+        santanderCollection.insert({
+            "jugador": str(d['jugador'].encode('iso-8859-1')),
+            "posicion": d['posicion'],
+            "equipo": str(d['equipo'].encode('iso-8859-1'))
+        })
+    print "Insertado correctamente: liga santander"
 
 
 client.close()
 
 
 if __name__ == '__main__':
-    insertarData()
+   insertarData()
