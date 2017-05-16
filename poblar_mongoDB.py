@@ -96,6 +96,17 @@ def getDataPlayersSantander():
         for d in datos:
             jugador = d.td.strong.string
 
+            #edad jugador
+            edad = d.td.find_next('td').string
+            if edad is not None:
+                edad2 = edad[:2]
+
+            #estatura jugador
+            estatura = d.td.find_next('td').find_next('td').string
+            if d.td.find_next('td').find_next('td').string is not None:
+                estatura2 = estatura[:3]
+
+
             # posicion de jugador str(.encode('iso-8859-1'))
             posicion = d.find('td',{'class':'pos1'}).string
 
@@ -104,12 +115,15 @@ def getDataPlayersSantander():
 
             # Diccionario de entrada
             dic_in = {"jugador": jugador.replace(". ", "."),
+                      "edad":edad2,
+                      "estatura":str(float(estatura2)*0.01)[:4],
                       "posicion": posicion,
                       "equipo": equipo,
                       }
 
             # array de jugadores
             jugadores_dict.append(dic_in)
+
 
 
     return jugadores_dict
@@ -135,6 +149,8 @@ def insertarData():
     for d in data1:
         santanderCollection.insert({
             "jugador": str(d['jugador'].encode('iso-8859-1')),
+            "edad":d['edad'],
+            "estatura":d['estatura'],
             "posicion": d['posicion'],
             "equipo": str(d['equipo'].encode('iso-8859-1'))
         })
