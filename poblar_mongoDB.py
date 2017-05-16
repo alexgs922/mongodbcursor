@@ -5,6 +5,10 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from pymongo import MongoClient
 
+# Conexión con la base de datos
+client = MongoClient()
+db = client.liga
+premierCollection = db.premier
 
 def getDataPlayers():
     url = "http://fantasy.premierleague.com/player-list/"
@@ -72,24 +76,36 @@ def getDataPlayers():
 
 
 def insertarData():
-    client = MongoClient()
-    db = client.liga
-    premierCollection = db.premier
 
     data = getDataPlayers()
 
-    for d in data:
-        premierCollection.insert({
-            "extractdate": d['extractdate'],
-            "jugador": d['jugador'],
-            "equipo": d['equipo'],
-            "rawpoints": d['rawpoints'],
-            "coste": d['coste'],
-            "posicion": d['posicion']
-        })
+    bd = premierCollection.find()
 
-    print "Insertado correctamente"
+    if bd.count() == 0:
+        for d in data:
+            premierCollection.insert({
+                "extractdate": d['extractdate'],
+                "jugador": d['jugador'],
+                "equipo": d['equipo'],
+                "rawpoints": d['rawpoints'],
+                "coste": d['coste'],
+                "posicion": d['posicion']
+            })
+        print "Insertado correctamente "
+    else:
+        premierCollection.remove()
+        for d in data:
+            premierCollection.insert({
+                "extractdate": d['extractdate'],
+                "jugador": d['jugador'],
+                "equipo": d['equipo'],
+                "rawpoints": d['rawpoints'],
+                "coste": d['coste'],
+                "posicion": d['posicion']
+            })
+        print "Insertado correctamente "
 
+client.close()
 
 
 if __name__ == '__main__':
