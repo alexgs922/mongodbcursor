@@ -100,11 +100,15 @@ def getDataPlayersSantander():
             edad = d.td.find_next('td').string
             if edad is not None:
                 edad2 = edad[:2]
+            else:
+                edad2 = ""
 
             #estatura jugador
             estatura = d.td.find_next('td').find_next('td').string
             if d.td.find_next('td').find_next('td').string is not None:
                 estatura2 = estatura[:3]
+            else:
+                estatura2 = 0
 
 
             # posicion de jugador str(.encode('iso-8859-1'))
