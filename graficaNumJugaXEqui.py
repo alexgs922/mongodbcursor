@@ -1,7 +1,8 @@
 import pymongo
-from bokeh.layouts import row
 from bokeh.plotting import figure, show, output_file
 from pymongo import MongoClient
+
+from bokeh.charts import Bar, output_file, show
 
 
 
@@ -45,26 +46,25 @@ def getNumJugadPremier():
 
 cursorSantander = santander.find()
 
-equiposSantander = []
+posicionesSantander = []
 jugadoresSantander = []
 dicSantander = dict()
 
 def getNumJugadSantander():
     for c in cursorSantander:
-        if c['equipo'] not in equiposSantander:
-            equiposSantander.append(c['equipo'])
+        if c['posicion'] not in posicionesSantander:
+            posicionesSantander.append(c['posicion'])
 
-    for e in equiposSantander:
-        x = santander.find({'equipo':str(e.encode('utf-8'))}).count()
+    for e in posicionesSantander:
+        x = santander.find({'posicion':str(e.encode('utf-8'))}).count()
         jugadoresSantander.append(x)
 
 
+    dot = figure(title="Numero de jugadores por posicion (Liga Santander)", tools="", toolbar_location=None,
+              y_range=[0,500],x_range=posicionesSantander)
+    dot.segment(posicionesSantander, 0,  posicionesSantander, jugadoresSantander, line_width=10, line_color="purple",)
+    dot.circle(posicionesSantander, jugadoresSantander, size=15, fill_color="orange", line_color="purple", line_width=3, )
 
-    dot = figure(title="Numero de jugadores por equipo (Liga Santander)", tools="", toolbar_location=None,
-              y_range=equiposSantander,x_range=[0,50])
-
-    dot.segment(0, equiposSantander, jugadoresSantander, equiposSantander, line_width=2, line_color="green",)
-    dot.circle(jugadoresSantander, equiposSantander, size=15, fill_color="orange", line_color="green", line_width=3, )
 
     output_file("numJugadoresXEquipo(Santander).html")
     show(dot)
