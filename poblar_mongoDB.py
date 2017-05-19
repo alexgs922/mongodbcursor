@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-import json
 
+import json
 import requests
 import htmlmin
 from bs4 import BeautifulSoup
 from datetime import datetime
 from pymongo import MongoClient
+
 
 # Conexión con la base de datos
 client = MongoClient()
@@ -13,7 +14,8 @@ db = client.liga
 premierCollection = db.premier
 santanderCollection = db.santander
 
-def getDataPlayersPremier():
+
+def get_data_players_premier():
     url = "http://fantasy.premierleague.com/player-list/"
     r = requests.get(url)
 
@@ -74,7 +76,7 @@ def getDataPlayersPremier():
     return jugadores_dict
 
 
-def getDataPlayersSantander():
+def get_data_players_santander():
     ##peticion a la web
     url = "http://www.resultados-futbol.com/primera/grupo1/jugadores"
     r = requests.get(url)
@@ -128,18 +130,14 @@ def getDataPlayersSantander():
             # array de jugadores
             jugadores_dict.append(dic_in)
 
-
-
     return jugadores_dict
 
 
-
-
-def insertarData():
-    data = getDataPlayersPremier()
-    data1 = getDataPlayersSantander()
+def insertar_data():
+    premier = get_data_players_premier()
+    santander = get_data_players_santander()
     premierCollection.remove()
-    for d in data:
+    for d in premier:
         premierCollection.insert({
             "extractdate": d['extractdate'],
             "jugador": d['jugador'],
@@ -150,7 +148,7 @@ def insertarData():
         })
     print "Insertado correctamente: premier league"
     santanderCollection.remove()
-    for d in data1:
+    for d in santander:
         santanderCollection.insert({
             "jugador": str(d['jugador'].encode('iso-8859-1')),
             "edad":d['edad'],
@@ -160,9 +158,8 @@ def insertarData():
         })
     print "Insertado correctamente: liga santander"
 
-
 client.close()
 
 
 if __name__ == '__main__':
-   insertarData()
+   insertar_data()
