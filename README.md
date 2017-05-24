@@ -1,8 +1,8 @@
 # mongodbcursor
 Proyecto de cursores en MongoDB
 
-Tutorial de instalación de depencencias (pip) - https://pip.pypa.io/en/stable/quickstart/
+ - **[Tutorial de instalación de depencencias (pip)](url "https://pip.pypa.io/en/stable/quickstart/")**
+###Dependencias
+Se encuentran en <code>'requirements.txt'</code> 
 
-Dependencias -> requirements.txt 
-
-Para instalarlas pip install -r requirements.txt
+Para instalarlas: <code>pip install -r requirements.txt</code>
